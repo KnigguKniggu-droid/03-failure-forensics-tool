@@ -1,0 +1,9 @@
+services:
+  regression-runner:
+    build: .
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./data:/app/data
+      - ./prompts:/app/prompts
+      - ./tests:/app/tests

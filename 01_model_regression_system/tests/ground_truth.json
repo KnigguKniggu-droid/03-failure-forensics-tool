@@ -1,0 +1,84 @@
+{
+  "test_items": [
+    {
+      "id": "gt-001",
+      "subject": "Invoice shows double charge for July",
+      "body": "Hi, I just checked my July invoice and it looks like I was charged twice for the same subscription period. Can you look into this and issue a refund for the duplicate charge? My account number is 48291.",
+      "expected_category": "billing",
+      "expected_difficulty": "easy",
+      "tags": ["refund", "duplicate_charge", "invoice"]
+    },
+    {
+      "id": "gt-002",
+      "subject": "API returns 500 error on /v2/users endpoint",
+      "body": "When I call GET /v2/users with a valid auth token, the server returns a 500 internal server error. This started happening after the latest deployment. The error response body is {\"error\": \"internal_error\", \"trace_id\": \"a8f3k2\"}.",
+      "expected_category": "technical",
+      "expected_difficulty": "easy",
+      "tags": ["api_error", "500", "bug_report"]
+    },
+    {
+      "id": "gt-003",
+      "subject": "Cannot log in after password reset",
+      "body": "I reset my password using the email link but now I cannot log in with the new password. I have tried multiple times and it keeps saying invalid credentials. My username is jsmith42.",
+      "expected_category": "account",
+      "expected_difficulty": "easy",
+      "tags": ["login", "password_reset", "access"]
+    },
+    {
+      "id": "gt-004",
+      "subject": "Feature request: dark mode for dashboard",
+      "body": "I love your product and use it daily. It would be really helpful if you could add a dark mode option to the analytics dashboard. The current white background is hard on my eyes during extended sessions.",
+      "expected_category": "general",
+      "expected_difficulty": "easy",
+      "tags": ["feature_request", "feedback", "ui"]
+    },
+    {
+      "id": "gt-005",
+      "subject": "Billing question about plan upgrade proration",
+      "body": "I upgraded from the Pro plan to the Enterprise plan mid-cycle and my next invoice shows a partial charge. Can you explain how the proration was calculated? I want to make sure the amount is correct before I pay. Also my API integration seems to be timing out intermittently.",
+      "expected_category": "billing",
+      "expected_difficulty": "hard",
+      "tags": ["proration", "plan_upgrade", "invoice", "mixed_signals"]
+    },
+    {
+      "id": "gt-006",
+      "subject": "Webhook integration not receiving events",
+      "body": "I have set up a webhook endpoint at https://myapp.com/hooks/events and registered it in the dashboard, but I am not receiving any event payloads. I have checked my server logs and there are no incoming requests from your IP range. This is critical for our production pipeline.",
+      "expected_category": "technical",
+      "expected_difficulty": "medium",
+      "tags": ["webhook", "integration", "events"]
+    },
+    {
+      "id": "gt-007",
+      "subject": "Account ownership transfer request",
+      "body": "I am leaving my current company and need to transfer ownership of our organization account to my colleague. Her email is colleen@example.com. Please let me know what steps are required to complete this transfer and whether she needs to create a new account first.",
+      "expected_category": "account",
+      "expected_difficulty": "medium",
+      "tags": ["ownership_transfer", "organization", "user_management"]
+    },
+    {
+      "id": "gt-008",
+      "subject": "Question about GDPR data export",
+      "body": "Under GDPR regulations, I would like to request a full export of all data associated with my account. This includes all API logs, billing history, profile information, and any analytics data you have collected. Please let me know the expected turnaround time.",
+      "expected_category": "general",
+      "expected_difficulty": "medium",
+      "tags": ["gdpr", "data_export", "compliance", "privacy"]
+    },
+    {
+      "id": "gt-009",
+      "subject": "Refund not reflected on credit card statement",
+      "body": "You issued a refund of $49.99 on June 15th according to the support ticket, but my credit card statement does not show the credit. I have waited over 10 business days. Also, I need to update my payment method because my old card expired.",
+      "expected_category": "billing",
+      "expected_difficulty": "medium",
+      "tags": ["refund", "credit_card", "payment_method", "mixed_signals"]
+    },
+    {
+      "id": "gt-010",
+      "subject": "Rate limit headers missing from API responses",
+      "body": "According to your API documentation, responses should include X-RateLimit-Remaining and X-RateLimit-Reset headers. However, I am not seeing these headers in any of my responses, even on endpoints that are documented as rate-limited. I am using v3 of the API SDK.",
+      "expected_category": "technical",
+      "expected_difficulty": "hard",
+      "tags": ["rate_limit", "api", "headers", "documentation_discrepancy"]
+    }
+  ]
+}

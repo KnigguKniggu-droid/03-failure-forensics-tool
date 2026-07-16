@@ -1,0 +1,83 @@
+# Model configuration registry for the cost autopilot.
+# Costs are per 1K tokens in USD as of 2026-07.
+
+models:
+  - model_id: "gpt-4o"
+    provider: "openai"
+    display_name: "GPT-4o"
+    input_cost_per_1k: 0.005
+    output_cost_per_1k: 0.015
+    max_context: 128000
+    max_output: 16384
+    latency_p50_ms: 1200
+    quality_score: 0.95
+    supported_tiers: [1, 2, 3]
+    api_base: "https://api.openai.com/v1"
+    api_key_env: "OPENAI_API_KEY"
+
+  - model_id: "gpt-4o-mini"
+    provider: "openai"
+    display_name: "GPT-4o Mini"
+    input_cost_per_1k: 0.00015
+    output_cost_per_1k: 0.0006
+    max_context: 128000
+    max_output: 16384
+    latency_p50_ms: 500
+    quality_score: 0.82
+    supported_tiers: [1, 2]
+    api_base: "https://api.openai.com/v1"
+    api_key_env: "OPENAI_API_KEY"
+
+  - model_id: "claude-3-5-sonnet"
+    provider: "anthropic"
+    display_name: "Claude 3.5 Sonnet"
+    input_cost_per_1k: 0.003
+    output_cost_per_1k: 0.015
+    max_context: 200000
+    max_output: 8192
+    latency_p50_ms: 900
+    quality_score: 0.93
+    supported_tiers: [1, 2, 3]
+    api_base: "https://api.anthropic.com/v1"
+    api_key_env: "ANTHROPIC_API_KEY"
+
+  - model_id: "claude-3-haiku"
+    provider: "anthropic"
+    display_name: "Claude 3 Haiku"
+    input_cost_per_1k: 0.00025
+    output_cost_per_1k: 0.00125
+    max_context: 200000
+    max_output: 4096
+    latency_p50_ms: 300
+    quality_score: 0.78
+    supported_tiers: [1, 2]
+    api_base: "https://api.anthropic.com/v1"
+    api_key_env: "ANTHROPIC_API_KEY"
+
+  - model_id: "llama3.1-8b-local"
+    provider: "ollama"
+    display_name: "Llama 3.1 8B (Local)"
+    input_cost_per_1k: 0.0
+    output_cost_per_1k: 0.0
+    max_context: 128000
+    max_output: 4096
+    latency_p50_ms: 200
+    quality_score: 0.70
+    supported_tiers: [1, 2]
+    api_base: "http://localhost:11434/v1"
+    api_key_env: ""
+
+routing_rules:
+  tier_1_preferred: "gpt-4o-mini"
+  tier_2_preferred: "gpt-4o-mini"
+  tier_3_preferred: "gpt-4o"
+  fallback_chain:
+    - "gpt-4o"
+    - "claude-3-5-sonnet"
+    - "llama3.1-8b-local"
+
+verification:
+  enabled: true
+  sample_rate: 0.1
+  judge_model: "gpt-4o"
+  quality_threshold: 0.7

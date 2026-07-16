@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtime LLM Observability Dashboard</title>
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --accent: #4a9eff;
+            --warning: #f5a623;
+            --alarm: #e74c3c;
+            --text: #e0e0e0;
+            --text-dim: #888;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            padding: 20px;
+        }
+        h1 { font-size: 1.5rem; margin-bottom: 20px; color: var(--accent); }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .card {
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid #2a2d37;
+        }
+        .card h2 { font-size: 1rem; margin-bottom: 12px; color: var(--text-dim); }
+        .metric { display: flex; justify-content: space-between; padding: 4px 0; }
+        .metric .label { color: var(--text-dim); }
+        .metric .value { font-weight: 600; }
+        .value.warn { color: var(--warning); }
+        .value.alarm { color: var(--alarm); }
+        .value.ok { color: #2ecc71; }
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status-healthy { background: rgba(46,204,113,0.2); color: #2ecc71; }
+        .status-warning { background: rgba(245,166,35,0.2); color: var(--warning); }
+        .status-critical { background: rgba(231,76,60,0.2); color: var(--alarm); }
+        .anomaly-list { max-height: 200px; overflow-y: auto; }
+        .anomaly-item {
+            padding: 8px;
+            margin: 4px 0;
+            background: rgba(231,76,60,0.1);
+            border-left: 3px solid var(--alarm);
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #2ecc71;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+        #last-update { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+    <h1><span class="live-indicator"></span>Realtime LLM Observability</h1>
+    <div id="last-update">Connecting...</div>
+
+    <div class="grid">
+        <div class="card">
+            <h2>Active Streams</h2>
+            <div class="metric"><span class="label">Active</span><span class="value" id="active-streams">0</span></div>
+            <div class="metric"><span class="label">Total Requests (60s)</span><span class="value" id="total-requests">0</span></div>
+            <div class="metric"><span class="label">Error Rate</span><span class="value" id="error-rate">0.0%</span></div>
+        </div>
+
+        <div class="card">
+            <h2>Model Health</h2>
+            <div id="model-health"></div>
+        </div>
+
+        <div class="card">
+            <h2>P95 Latency by Model</h2>
+            <div id="latency-metrics"></div>
+        </div>
+
+        <div class="card">
+            <h2>Token Drift Anomalies</h2>
+            <div id="anomalies" class="anomaly-list"><span class="label">No anomalies detected</span></div>
+        </div>
+    </div>
+
+    <script>
+        const ws = new WebSocket(`ws://${window.location.host}/ws/dashboard`);
+        const lastUpdate = document.getElementById('last-update');
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            updateDashboard(data);
+            lastUpdate.textContent = 'Last update: ' + new Date().toLocaleTimeString();
+        };
+
+        ws.onclose = function() {
+            lastUpdate.textContent = 'Disconnected. Reconnecting...';
+            setTimeout(() => location.reload(), 3000);
+        };
+
+        function updateDashboard(data) {
+            document.getElementById('active-streams').textContent = data.active_streams;
+            document.getElementById('total-requests').textContent = data.total_requests_window;
+            const errorEl = document.getElementById('error-rate');
+            errorEl.textContent = (data.error_rate * 100).toFixed(2) + '%';
+            errorEl.className = 'value ' + (data.error_rate > 0.1 ? 'alarm' : data.error_rate > 0.05 ? 'warn' : 'ok');
+
+            const healthEl = document.getElementById('model-health');
+            healthEl.innerHTML = '';
+            for (const [model, health] of Object.entries(data.model_health)) {
+                const div = document.createElement('div');
+                div.className = 'metric';
+                const badge = `<span class="status-badge status-${health.status}">${health.status.toUpperCase()}</span>`;
+                div.innerHTML = `<span class="label">${model}</span>${badge}`;
+                healthEl.appendChild(div);
+            }
+
+            const latencyEl = document.getElementById('latency-metrics');
+            latencyEl.innerHTML = '';
+            for (const [model, metric] of Object.entries(data.latency_metrics)) {
+                const div = document.createElement('div');
+                div.className = 'metric';
+                const p95Class = metric.p95 > 5000 ? 'alarm' : metric.p95 > 2000 ? 'warn' : 'ok';
+                div.innerHTML = `<span class="label">${model}</span><span class="value ${p95Class}">P95: ${metric.p95.toFixed(0)}ms</span>`;
+                latencyEl.appendChild(div);
+            }
+
+            const anomalyEl = document.getElementById('anomalies');
+            if (data.anomalies && data.anomalies.length > 0) {
+                anomalyEl.innerHTML = '';
+                data.anomalies.forEach(a => {
+                    const div = document.createElement('div');
+                    div.className = 'anomaly-item';
+                    div.textContent = `${a.model}: drift ${a.drift_ratio.toFixed(2)} (${a.drift_direction}, expected ${a.expected_tokens}, got ${a.actual_tokens})`;
+                    anomalyEl.appendChild(div);
+                });
+            } else {
+                anomalyEl.innerHTML = '<span class="label">No anomalies detected</span>';
+            }
+        }
+    </script>
+</body>
+</html>

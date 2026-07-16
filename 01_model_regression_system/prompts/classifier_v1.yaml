@@ -1,0 +1,26 @@
+prompt_id: classifier_v1
+version: "1.0.0"
+model: gpt-4o-mini
+temperature: 0.0
+max_tokens: 50
+system_prompt: |
+  You are a customer support email classifier. Read the incoming email
+  and classify it into exactly one of the following categories:
+  - billing: Questions about invoices, charges, payments, refunds, or subscription plans.
+  - technical: Bug reports, integration issues, API errors, or product malfunction reports.
+  - account: Login problems, password resets, account access, profile changes, or user management.
+  - general: Anything that does not fit the three categories above, including feature requests,
+    feedback, or general inquiries.
+  Respond with only the category name. No explanation, no punctuation, no extra text.
+user_template: |
+  Email subject: {subject}
+  Email body: {body}
+categories:
+  - billing
+  - technical
+  - account
+  - general
+metadata:
+  author: ai-engineering-workspace
+  created: 2026-07-15
+  changelog: "Initial classifier prompt for customer support email routing"
